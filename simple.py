@@ -2,17 +2,16 @@
 
 
 #### 履歴 ####
-# 2018-07-31 : 引数方式から変更
-# 
-#
+# 2018-07-31 : 引数方式の方式を変更
 ##############
+
+#### 変更方針 ####
+# @where関数の引数をWhereクラスに変更する
+##################
+
 
 
 #select
-#notselect-
-#-wカラム名 演算
-#-not-w-str カラム名 =  val   -not-w-num 
-#-not-w-str カラム名 in val
 #-fパス
 
 import sys,re,csv
@@ -20,24 +19,39 @@ import parser
 from functools import partial
 
 
-######  SimpleCSVクラス  #################
+######  便利系関数 #########################
+
+### delBlankList:リスト内にある空白文字を削除する###
+def delBlankList(_list):
+ return list(filter(lambda x:not x=="", _list ))
+
+
+
+############################################
+
+
+
+######  SimpleCSVクラス  ###################
 
 class SimpleCSV:
  ### __init__:初期化 ###
- def __init__(self,data = None):
+ def __init__(self,data = ""):
   self.whereFlag=[]
-  self.wherePos =-1
-  self.headerNum = 0
-  if data == None:
+  self.wherePos =-1   #whereFlag用のインデックス
+  self.headerNum = 0  #ヘッダーの行番号
+  if data == "":
    #標準入力からCSVを取得
-   data = csv.reader(sys.stdin,delimiter=",")
+   buf  = sys.stdin.read().split("\n")
+   buf = delBlankList(buf)
+   data = csv.reader(buf,delimiter=",")
   else:
    #ファイルからCSVを取得
    buf = readFile(data).split("\n")
    buf.remove("")
    data = csv.reader(buf,delimiter=",")
   self.data = list(data)
-
+ 
+ ### columnToIndex:カラム名をインデックスに変換する### 
  def columnToIndex(self,name):
   return self.data[self.headerNum].index(name)
 
@@ -52,7 +66,7 @@ class SimpleCSV:
   #print(buf)
 
  ### whereNum:数値に対してwhere処理を行う ###
- def setWhereNum(self,proc,col):
+ def setWhereNum(self,proc,col,valType="num"):
   self.wherePos = self.wherePos + 1
   self.whereFlag.append([])
   cnt = -1
@@ -61,7 +75,14 @@ class SimpleCSV:
    if cnt == self.headerNum:
     self.whereFlag[self.wherePos].append(1)
     continue
-   if eval(str(x[col]) + proc  ):
+   
+   #型によって演算を変更
+   if valType == "num":     #数値比較の場合
+    checkVal = str(x[col])
+   else:                    #文字列比較の場合
+    checkVal = "\"{0}\"".format(x[col])
+   #演算の実行
+   if eval(checkVal + proc  ):
     self.whereFlag[self.wherePos].append(1)
    else:
     self.whereFlag[self.wherePos].append(0)
@@ -130,6 +151,7 @@ class ArgManager:
   arg = sys.argv[1::]
   argc = len(arg)
   #ファイルの取得
+  self.filePath = ""
   for x in arg:
    if not None ==  re.match("-f",x):
     self.filePath = x.split("-f")[1]
@@ -157,6 +179,7 @@ class ArgManager:
 ###################################
 
 
+#Whereのクラス
 class Where:
  def __init__(self,_list):
   self.name  = _list[0]
@@ -166,6 +189,8 @@ class Where:
  def debug(self):
   return "Where: name={0} , enzan={1} , val={2}".format(self.name,self.enzan,self.val)
 
+
+
 #main処理
 if __name__ == "__main__":
  argman = ArgManager()
@@ -174,13 +199,19 @@ if __name__ == "__main__":
  simCSV = SimpleCSV(argman.filePath)
  #print(simCSV.data)
  #print(argman.select)
- print(argman.getWhere()[0].debug())
- print(simCSV.columnToIndex( argman.getWhere()[0].name  ))
+ #print(argman.getWhere()[0].debug())
+ #print(simCSV.columnToIndex( argman.getWhere()[0].name  ))
 
- for x in argman.getWhere():
-  simCSV.setWhereNum(  x.enzan + x.val  ,simCSV.columnToIndex( x.name)   )
 
- simCSV.doWhereOR()
+ #whereが存在する場合はwhere処理を行う 
+ if 0< len(argman.getWhere()):
+  for x in argman.getWhere():
+   if x.val[0] in "1234567890-+":
+    valType = "num"
+   else:
+    valType = "str"
+   simCSV.setWhereNum(  x.enzan + x.val  ,simCSV.columnToIndex( x.name) ,valType  )
+   simCSV.doWhereOR()
  simCSV.print()
  if not len(argman.getSelect()) == len(set(argman.getSelect())):
   print("エラー:selectしたカラムが重複しています")
@@ -190,18 +221,6 @@ if __name__ == "__main__":
  if not argman.getSelect() == []:
   simCSV.select(argman.getSelect())
  simCSV.print()
-
-
-"""
- simCSV.setWhereNum("<250",0)
- simCSV.setWhereNum("<250",1)
- print(simCSV.whereFlag)
- simCSV.doWhereAND()
- simCSV.print()
-"""
-
-
-
 
 
 
