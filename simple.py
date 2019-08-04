@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+# encoding: utf-8
+from __future__ import print_function
 
 
 #### 履歴 ####
@@ -25,6 +27,11 @@ from functools import partial
 def delBlankList(_list):
  return list(filter(lambda x:not x=="", _list ))
 
+#debugPrint
+#関数名と引数
+def getFuncName():
+ return sys._getframe().f_code.co_name
+
 
 
 ############################################
@@ -34,6 +41,10 @@ def delBlankList(_list):
 ######  SimpleCSVクラス  ###################
 
 class SimpleCSV:
+ #whereFlag
+ #wherePos
+ #headerNum:CSVのヘッダーとなる行番号
+ #data:データの中身
  ### __init__:初期化 ###
  def __init__(self,data = ""):
   self.whereFlag=[]
@@ -47,16 +58,34 @@ class SimpleCSV:
   else:
    #ファイルからCSVを取得
    buf = readFile(data).split("\n")
+   print(buf)
    buf.remove("")
    data = csv.reader(buf,delimiter=",")
-  self.data = list(data)
+  self.data = list(data)#f
  
  ### columnToIndex:カラム名をインデックスに変換する### 
+ #name:インデックスを取得したいヘッダの名称。
+ #戻り値:インデックス。
  def columnToIndex(self,name):
   return self.data[self.headerNum].index(name)
 
+ ### getHeader ###
+ #ヘッダーのリストを取得する
+ #戻り値:hederNumが正の値であれば、
+ #それをインデックスとして返す
+ #負の値であれば、列番をヘッダーとして返す
+ def getHeader(self):
+  if 0<=self.headerNum :
+   return self.data[self.headerNum]
+  data_len = len(self.data[0])
+  return list( range( data_len ) )
+
  ### select:カラムを選択する ###
  def select(self,_names):
+  #print("select:"+_names)#Debug
+  if not type(_names) == list:
+   _names = toList(_names)
+   print("select:"+str(_names))#Debug
   selectIndex =  mIndexList( self.data[self.headerNum],*_names)
   buf = []
   #print(selectIndex)
@@ -117,15 +146,19 @@ class SimpleCSV:
 ############################################
 
 
-#ファイルを読みこむ
+#readFile
+#path:ファイルパス
+#テキストファイルを読み込んで文字列を返す
 def readFile(path):
  f = open(path,"r")
  res = f.read()
  f.close()
  return res
 
-
-#リストで指定されたpopする
+#mPopList
+#リストから指定されたインデックスの値をpopする
+#_list:ポップする元になるリスト
+#_num:popするインデックス（複数指定可能）
 def mPopList(_list,*_num):
  ret = []
  _num =list(_num)
@@ -135,13 +168,33 @@ def mPopList(_list,*_num):
   _num = list( map(  lambda x: x if(x<thisNum)else x-1   ,_num ))
   #print(_num)
  return ret
- 
+
+#mIndexList
 #リストで指定された要素が存在するインデックスを返す
+#_list:要素を探すもとになるリスト
+#*elem:インデックスを探した要素（複数指定可能）
 def mIndexList(_list,*elem):
+ #if not type(elem) == list:
+ # elem = toList(elem)
+ print(elem)
  ret = []
  for x in elem:
   ret.append( _list.index(x))
  return ret
+
+#toList
+#strを一つ持つlistを作成可能なlistのコンストラクタ
+#data:リストにするデータ
+def toList(data):
+ #print("toList:"+data)#debug
+ _list = []
+ if type(data) in [str,int]:
+  _list.append(data)
+  print(_list)#debug
+  return _list
+ else:
+  return list(data)
+
 
 
 ##### 引数管理クラス #############
@@ -150,8 +203,16 @@ class ArgManager:
  def __init__(self):
   arg = sys.argv[1::]
   argc = len(arg)
-  #ファイルの取得
+  self.arg  = arg
+  self.argc = argc
+  #ファイルの取得i
   self.filePath = ""
+
+  #helpの確認を行う
+  if "--help" in arg:
+   print(help_msg)
+   exit()
+
   for x in arg:
    if not None ==  re.match("-f",x):
     self.filePath = x.split("-f")[1]
@@ -176,8 +237,17 @@ class ArgManager:
    b = Where(a)
    ret.append(b)
   return ret
+
+ def checkHelp():
+  if "--help" in self.arg:
+   return True
+  return False
+
 ###################################
 
+#ヘルプメッセージ
+help_msg="""ファイルの指定 -fファイル名
+"""
 
 #Whereのクラス
 class Where:
@@ -193,17 +263,16 @@ class Where:
 
 #main処理
 if __name__ == "__main__":
- argman = ArgManager()
- #print(argman.select)
- #print(argman.filePath)
+ argman = ArgManager() 
+ print(argman.filePath)
  simCSV = SimpleCSV(argman.filePath)
- #print(simCSV.data)
- #print(argman.select)
- #print(argman.getWhere()[0].debug())
- #print(simCSV.columnToIndex( argman.getWhere()[0].name  ))
-
-
+ simCSV.select("dango")
+ print(simCSV.data)
+ 
+ 
+ 
  #whereが存在する場合はwhere処理を行う 
+"""
  if 0< len(argman.getWhere()):
   for x in argman.getWhere():
    if x.val[0] in "1234567890-+":
@@ -222,7 +291,7 @@ if __name__ == "__main__":
   simCSV.select(argman.getSelect())
  simCSV.print()
 
-
+"""
 
 
 

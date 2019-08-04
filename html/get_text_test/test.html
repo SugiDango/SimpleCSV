@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <title></title>
+  <script type="text/javascript">
+    function getData() {
+      //var xmlhttp = createXMLHttpRequest(); //旧バージョンのIEなどに対応する場合
+      var xmlhttp = new XMLHttpRequest();
+
+      xmlhttp.onreadystatechange = function() {
+        if (xmlhttp.readyState == 4) {
+          if (xmlhttp.status == 200) { 
+            var elem = document.getElementById("output");
+            elem.innerText = xmlhttp.responseText;
+          } else {
+            alert("status = " + xmlhttp.status);
+          } 
+        }
+      }
+      xmlhttp.open("GET", "textdata.txt");
+      xmlhttp.send();
+    }
+    
+    function createXMLHttpRequest(){
+      if(window.XMLHttpRequest){return new XMLHttpRequest()}
+      if(window.ActiveXObject){
+        try{return new ActiveXObject("Msxml2.XMLHTTP.6.0")}catch(e){}
+        try{return new ActiveXObject("Msxml2.XMLHTTP.3.0")}catch(e){}
+        try{return new ActiveXObject("Microsoft.XMLHTTP")}catch(e){}
+      }
+      return false;
+    }
+
+  </script>
+</head>
+<body>
+  <input id="Button_Get" type="button" value="取得" onclick="getData();" />
+  <div>受信情報</div>
+  <div id="output"></div>
+</body>
+</html>

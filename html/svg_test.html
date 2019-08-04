@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <title>系統版サンプル</title>
+  <script src="keitouban.js">
+  </script>
+  <script type="text/javascript">
+
+  </script>
+</head>
+<body bgcolor="black">
+  <input type="button" id="btn1" value="ボタン１" onclick="getJSON();" />
+  <input type="button" id="btn2" value="ボタン２" onclick="TmSymbolUpdate('TM1');" />
+  <h1><font color="white">系統盤</h1>
+  <svg id="keitoban" width="500" height="500" >
+  <!-- 発電機１ -->
+  <rect id="CB1"  x="50" y="75"  width="25" height="25" fill="red"   onclick="operateCB(this);" />
+  <text id="TM1CON" x="75" y="15" stroke="white" onclick="operateTM(this)";>指令値:---MW</text>
+  <text id="TM1NOW" x="75" y="35" stroke="white" onclick="operateTM(this)";>発電量:---MW</text>
+  <line id="BS1" x1="63" y1="75" x2="63" y2="20" stroke="red" stroke-width="3" />
+  <line id="BS2" x1="63" y1="100" x2="63" y2="200" stroke="red" stroke-width="3" />
+  <circle id="GN1" cx="63" cy="20" r="12" fill="red" />
+  <text id="G"  x="57" y="25"   stroke="gray" >G</text>
+
+  <!-- 発電機2 -->
+  <rect id="CB2"  x="275" y="75"  width="25" height="25" fill="red"   onclick="operateCB(this);" />
+  <text id="TM2CON" x="300" y="15" stroke="white" onclick="operateTM(this)";>指令値:---MW</text>
+  <text id="TM2NOW" x="300" y="35" stroke="white" onclick="operateTM(this)";>発電量:---MW</text>
+  <circle id="GN2" cx="288" cy="20" r="12" fill="red" />
+  <line id="BS3" x1="288" y1="75" x2="288" y2="20" stroke="red" stroke-width="3" />
+  <line id="BS4" x1="288" y1="100" x2="288" y2="200" stroke="red" stroke-width="3" />
+
+  <line id="BS5" x1="63" y1="200" x2="288" y2="200" stroke="red" stroke-width="3" />
+
+  <rect id="CB3"  x="100" y="100"  width="25" height="25" fill="red"   onclick="operateCB(this);" />
+
+
+
+
+  <!-- 需要家１ -->
+  <rect id=CB4"  x="50" y="275"  width="25" height="25" fill="red"   onclick="operateCB(this);" />
+  <text id="TM3" x="75" y="400" stroke="white" >消費量:---MW</text>
+  <line id="BS6" x1="63" y1="275" x2="63" y2="220" stroke="red" stroke-width="3" />
+  <line id="BS7" x1="63" y1="300" x2="63" y2="400" stroke="red" stroke-width="3" />
+  <circle id="GN1" cx="63" cy="412" r="12" fill="red" />
+
+  <!-- 需要家１ -->
+  <rect id=CB5"  x="275" y="275"  width="25" height="25" fill="red"   onclick="operateCB(this);" />
+  <text id="TM4" x="300" y="400" stroke="white" >消費量:---MW</text>
+  <line id="BS7" x1="288" y1="275" x2="288" y2="220" stroke="red" stroke-width="3" />
+  <line id="BS8" x1="288" y1="300" x2="288" y2="400" stroke="red" stroke-width="3" />
+  <circle id="GN1" cx="288" cy="412" r="12" fill="red" />
+
+
+
+
+
+
+</svg>
+  
+</body>
+</html>
